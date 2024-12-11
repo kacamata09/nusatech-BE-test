@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "node src/app.js",
+    "migrate:up": "node src/migrations/run_migrations.js",
+    "migrate:down": "node src/migrations/rollback_migrations.js"
+  },
   "dependencies": {
-    "express": "^4.21.2"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.11.5"
   }
 }
