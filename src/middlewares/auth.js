@@ -10,6 +10,6 @@ module.exports = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return helper.error(res, 'Invalid token', 401);
+    return helper.error(res, 'Token tidak tidak valid atau kadaluwarsa', 401);
   }
 };

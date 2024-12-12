@@ -5,7 +5,7 @@ const db = require('../config/database');
       INSERT INTO transactions (user_id, invoice_number, service_code, service_name, transaction_type, total_amount, created_on) 
       VALUES (?, ?, ?, ?, ?, ?, NOW());
     `;
-    await db.query(query, [userId, invoiceNumber, serviceCode, serviceName, transactionType || 'TOPUP', totalAmount]);
+   return await db.query(query, [userId, invoiceNumber, serviceCode, serviceName, transactionType || 'TOPUP', totalAmount]);
   }
 
   exports.getUserTransactions =   async (userId) => {
