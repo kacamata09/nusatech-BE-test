@@ -5,7 +5,7 @@ module.exports = {
           id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT NOT NULL,
           invoice_number VARCHAR(50) NOT NULL UNIQUE,
-          service_code VARCHAR(50) NOT NULL,
+          service_code VARCHAR(50) DEFAULT NULL,
           service_name VARCHAR(100) NOT NULL,
           transaction_type ENUM('PAYMENT', 'TOPUP') NOT NULL,
           total_amount DECIMAL(10, 2) NOT NULL,

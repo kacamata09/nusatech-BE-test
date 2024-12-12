@@ -1,62 +1,46 @@
-const UserRepository = require('../repositories/userRepository');
-const ApiResponse = require('../helpers/apiResponse');
+const userRepository = require('../repositories/userRepository');
+const userBalanceRepository = require('../repositories/userBalanceRepository');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const helper = require('../helpers/responseHelper');
 
-const UserController = {
-  async getAllUsers(req, res, next) {
-    const response = new ApiResponse(res);
+  exports.register = async (req, res) => {
     try {
-      const users = await UserRepository.findAll();
-      return response.success(users, 'Users retrieved successfully');
-    } catch (error) {
-      next(error);
-    }
-  },
+      const { email, password } = req.body;
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const userId = await userRepository.createUser(email, hashedPassword);
 
-  async getUserById(req, res, next) {
-    const response = new ApiResponse(res);
+      return helper.success(res, { userId }, 'User registered successfully');
+    } catch (error) {
+      return helper.error(res, error.message);
+    }
+  }
+
+  exports.login = async (req, res) => {
     try {
-      const { id } = req.params;
-      const user = await UserRepository.findById(id);
-      if (!user) {
-        return response.error('User not found', 404);
-      }
-      return response.success(user, 'User retrieved successfully');
-    } catch (error) {
-      next(error);
-    }
-  },
+      const { email, password } = req.body;
+      const user = await userRepository.findUserByEmail(email);
+      if (!user) return helper.error(res, 'Invalid email or password', 401);
 
-  async createUser(req, res, next) {
-    const response = new ApiResponse(res);
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      if (!isValidPassword) return helper.error(res, 'Invalid email or password', 401);
+
+      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      return helper.success(res, { token }, 'Login successful');
+    } catch (error) {
+      return helper.error(res, error.message);
+    }
+  }
+
+  exports.getBalance = async (req, res) => {
     try {
-      const user = await UserRepository.create(req.body);
-      return response.success(user, 'User created successfully', 201);
-    } catch (error) {
-      next(error);
-    }
-  },
+      const userId = req.user.id;
+      const balance = await userBalanceRepository.getBalance(userId);
 
-  async updateUser(req, res, next) {
-    const response = new ApiResponse(res);
-    try {
-      const { id } = req.params;
-      const user = await UserRepository.update(id, req.body);
-      return response.success(user, 'User updated successfully');
+      return helper.success(res, { balance }, 'Balance retrieved successfully');
     } catch (error) {
-      next(error);
+      return helper.error(res, error.message);
     }
-  },
+  }
 
-  async deleteUser(req, res, next) {
-    const response = new ApiResponse(res);
-    try {
-      const { id } = req.params;
-      await UserRepository.delete(id);
-      return response.success(null, 'User deleted successfully', 204);
-    } catch (error) {
-      next(error);
-    }
-  },
-};
 
-module.exports = UserController;

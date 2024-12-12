@@ -1,38 +1,32 @@
 const db = require('../config/database');
 
-const UserRepository = {
-  async findAll() {
-    const [rows] = await db.query('SELECT * FROM users');
-    return rows;
-  },
+class UserRepository {
+  async createUser(email, passwordHash) {
+    const query = `
+      INSERT INTO users (email, password_hash) 
+      VALUES (?, ?);
+    `;
+    const [result] = await db.query(query, [email, passwordHash]);
+    return result.insertId;
+  }
 
-  async findById(id) {
-    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+  async findUserByEmail(email) {
+    const query = `
+      SELECT * FROM users 
+      WHERE email = ?;
+    `;
+    const [rows] = await db.query(query, [email]);
     return rows[0];
-  },
+  }
 
-  async create(data) {
-    const { name, email } = data;
-    const [result] = await db.query(
-      'INSERT INTO users (name, email) VALUES (?, ?)',
-      [name, email]
-    );
-    return { id: result.insertId, ...data };
-  },
+  async findUserById(id) {
+    const query = `
+      SELECT * FROM users 
+      WHERE id = ?;
+    `;
+    const [rows] = await db.query(query, [id]);
+    return rows[0];
+  }
+}
 
-  async update(id, data) {
-    const { name, email } = data;
-    await db.query('UPDATE users SET name = ?, email = ? WHERE id = ?', [
-      name,
-      email,
-      id,
-    ]);
-    return { id, ...data };
-  },
-
-  async delete(id) {
-    await db.query('DELETE FROM users WHERE id = ?', [id]);
-  },
-};
-
-module.exports = UserRepository;
+module.exports = new UserRepository();
