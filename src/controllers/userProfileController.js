@@ -27,7 +27,7 @@ exports.createProfile = async (req, res) => {
   
      
       if (!firstName || !lastName) {
-        return helper.error(res, 'First name and last name are required', 400);
+        return helper.error(res, 'First name and last name mohon diisi terlebih dahulu', 400);
       }
   
      
